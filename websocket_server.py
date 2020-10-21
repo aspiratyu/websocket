@@ -7,12 +7,9 @@ import websockets
 from fly import *
 from websockets import WebSocketServerProtocol
 
-SERVER = '192.168.0.33'
+SERVER = '192.168.0.174'
 PORT = 5050
 logging.basicConfig(level=logging.INFO)
-
-
-point = point(1, 1)
 
 
 class Server:
@@ -31,7 +28,7 @@ class Server:
         if self.clients:
             await asyncio.wait([client.send(message) for client in self.clients])
 
-    async def ws_handler(self, ws:WebSocketServerProtocol, url: str) -> None:
+    async def ws_handler(self, ws: WebSocketServerProtocol, url: str) -> None:
         await self.register(ws)
         try:
             await self.distribute(ws)
@@ -42,7 +39,7 @@ class Server:
         async for message in ws:
             print(message)
             #(x, y) = fly.getflycoord(myfly)
-        #    await self.send_to_clients(x + " " + y)
+            #await self.send_to_clients(x + " " + y)
             await self.send_to_clients(message)
 
   #  async def sendflycoord(self, ws: WebSocketServerProtocol) -> None:
@@ -53,25 +50,10 @@ class Server:
 
 if __name__ == '__main__':
     myfly = fly(1000, 1000, 100)
-    messages_buffer = Manager().list()
-    processes =[]
-
-    #serverthread = threading.Thread(target=start())
-    #serverthread.start()
-    #loop = asyncio.get_event_loop()
     server = Server()
     start_server = websockets.serve(server.ws_handler, SERVER, PORT)
-    pServer = Process(target=websockets.serve(server.ws_handler, SERVER, PORT))
-    #tasks = [(task,"One",start_server),(task,"Two",myfly.animate())]
-    #wait_tasks = asyncio.wait(tasks)
-    #loop.run_until_complete(wait_tasks)
-    #loop.run_forever(wait_tasks)
-
-    #myfly.start_fly()
-    #print(threading.active_count())
-    #thread = threading.Thread(target=myfly.animate())
-    #thread.start()
-    #print("xfsdfsdafs")
-
-
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start_server)
+    loop.run_until_complete(myfly.animate())
+    loop.run_forever()
 

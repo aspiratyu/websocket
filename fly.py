@@ -67,7 +67,7 @@ class fly:
         thread.join()
 
     async def animate(self):
-
+        while True:
             #print("target ", self.a[0].x, " ", self.a[0].y)
 
             for i in range(1, len(self.a)):
@@ -86,6 +86,7 @@ class fly:
 
             print("fly ", self.a[len(self.a) - 1].x, " ", self.a[len(self.a) - 1].y)
             await asyncio.sleep(0.1)
+
         # ax.plot(a[len(a) - 1].x, a[len(a) - 1].y, 'ro')
         # ax.plot(a[0].x, a[0].y, 'bx')
 
