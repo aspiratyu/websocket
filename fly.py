@@ -7,6 +7,8 @@ from matplotlib import animation
 import math
 import time
 
+from websocket_server import Server
+
 N = 1
 
 
@@ -61,6 +63,12 @@ class fly:
     def getflycoord(self) -> point:
         return self.a[4]
 
+    def get_x(self):
+        return self.a[len(self.a)-1].x
+
+    def get_y(self):
+        return self.a[len(self.a) - 1].y
+
     def start_fly(self):
         thread = threading.Thread(target=self.animate())
         thread.start()
@@ -85,6 +93,7 @@ class fly:
                     #print("target ", self.a[0].x, " ", self.a[0].y)
 
             print("fly ", self.a[len(self.a) - 1].x, " ", self.a[len(self.a) - 1].y)
+            #Server.send_to_all(str(self.a[len(self.a) - 1].x) + " " + str(self.a[len(self.a) - 1].y))
             await asyncio.sleep(0.1)
 
         # ax.plot(a[len(a) - 1].x, a[len(a) - 1].y, 'ro')

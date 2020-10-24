@@ -1,13 +1,13 @@
 import asyncio
 import logging
 import threading
-from multiprocessing import Process,Manager
+from multiprocessing import Process, Manager
 import task as task
 import websockets
 from fly import *
 from websockets import WebSocketServerProtocol
 
-SERVER = '192.168.0.174'
+SERVER = '192.168.43.196'
 PORT = 5050
 logging.basicConfig(level=logging.INFO)
 
@@ -30,22 +30,49 @@ class Server:
 
     async def ws_handler(self, ws: WebSocketServerProtocol, url: str) -> None:
         await self.register(ws)
-        try:
-            await self.distribute(ws)
-        finally:
-            await self.unregister(ws)
+        consumer_task = asyncio.ensure_future(
+            self.consumer_handler(ws))
+        producer_task = asyncio.ensure_future(
+            self.producer_handler(ws))
+        done, pending = await asyncio.wait(
+            [consumer_task, producer_task],
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        for task in pending:
+            task.cancel()
+
+    async def consumer_handler(self, websocket):
+        async for message in websocket:
+            await self.consumer(message)
+
+    async def producer_handler(self, websocket):
+        while True:
+            message = await self.producer()
+            await websocket.send(message)
+
+    async def producer(self) -> str:
+        await asyncio.sleep(0.01)
+        return str(myfly.get_x()) + " " + str(myfly.get_y())
+
+    async def consumer(self, message):
+        logging.info(f'{message} connects')
+
+    @staticmethod
+    def send_to_all(message):
+        ([client.send(message) for client in Server.clients])
 
     async def distribute(self, ws: WebSocketServerProtocol) -> None:
         async for message in ws:
             print(message)
-            #(x, y) = fly.getflycoord(myfly)
-            #await self.send_to_clients(x + " " + y)
+            # (x, y) = fly.getflycoord(myfly)
+            # await self.send_to_clients(x + " " + y)
             await self.send_to_clients(message)
 
-  #  async def sendflycoord(self, ws: WebSocketServerProtocol) -> None:
+
+#  async def sendflycoord(self, ws: WebSocketServerProtocol) -> None:
 
 
-  #loop.run_forever()
+# loop.run_forever()
 
 
 if __name__ == '__main__':
@@ -54,6 +81,5 @@ if __name__ == '__main__':
     start_server = websockets.serve(server.ws_handler, SERVER, PORT)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_server)
-    loop.run_until_complete(myfly.animate())
+    loop.create_task(myfly.animate())
     loop.run_forever()
-
