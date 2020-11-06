@@ -93,7 +93,7 @@ class fly:
                     #print("target ", self.a[0].x, " ", self.a[0].y)
 
             print("fly ", self.a[len(self.a) - 1].x, " ", self.a[len(self.a) - 1].y)
-            #Server.send_to_all(str(self.a[len(self.a) - 1].x) + " " + str(self.a[len(self.a) - 1].y))
+            await Server.send_to_all(str(self.a[len(self.a) - 1].x) + " " + str(self.a[len(self.a) - 1].y))
             await asyncio.sleep(0.1)
 
         # ax.plot(a[len(a) - 1].x, a[len(a) - 1].y, 'ro')

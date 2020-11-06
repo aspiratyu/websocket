@@ -7,7 +7,7 @@ import websockets
 from fly import *
 from websockets import WebSocketServerProtocol
 
-SERVER = '192.168.43.196'
+SERVER = '192.168.0.174'
 PORT = 5050
 logging.basicConfig(level=logging.INFO)
 
@@ -46,19 +46,21 @@ class Server:
             await self.consumer(message)
 
     async def producer_handler(self, websocket):
+        pass
         while True:
             message = await self.producer()
             await websocket.send(message)
 
     async def producer(self) -> str:
-        await asyncio.sleep(0.01)
-        return str(myfly.get_x()) + " " + str(myfly.get_y())
+        await asyncio.sleep(0.001)
+        return "sykablyad " + str(myfly.get_x()) + " " + str(myfly.get_y())
 
     async def consumer(self, message):
         logging.info(f'{message} connects')
 
     @staticmethod
-    def send_to_all(message):
+    async def send_to_all(message):
+        await asyncio.sleep(0.001)
         ([client.send(message) for client in Server.clients])
 
     async def distribute(self, ws: WebSocketServerProtocol) -> None:
